@@ -116,6 +116,8 @@ services:
       kibana: { condition: service_healthy }
       metricbeat-init: { condition: service_started }
       logstash: { condition: service_healthy }
+    cap_add:
+      - SYS_PTRACE
     networks:
       - elk
 
