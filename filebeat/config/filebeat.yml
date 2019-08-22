@@ -1,0 +1,28 @@
+########################## Filebeat Configuration ###########################
+filebeat.max_start_delay: 10s
+name: ${NODE_NAME}
+setup.dashboards.enabled: true
+setup.kibana:
+  host: "kibana:5601"
+
+filebeat.modules:
+- module: system
+  syslog:
+    enabled: true
+  auth:
+    enabled: true
+
+processors:
+- add_docker_metadata:
+    host: "unix:///var/run/docker.sock"
+- add_host_metadata:
+    netinfo.enabled: true
+
+output:
+  logstash:
+    hosts: ["logstash:5044"]
+
+logging.level: info
+logging.json: false
+logging.metrics.enabled: false
+ssl.verification_mode: none

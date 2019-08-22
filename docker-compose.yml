@@ -2,6 +2,99 @@ version: '2.1'
 
 services:
 
+
+  filebeat-init:
+    build:
+      context: filebeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    user: root
+    command: filebeat setup -E setup.kibana.host=kibana:5601 -E output.elasticsearch.hosts=["elasticsearch:9200"]
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      NODE_NAME: $HOSTNAME
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+      kibana: { condition: service_healthy }
+    networks:
+      - elk
+
+  filebeat:
+    build:
+      context: filebeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    user: root
+    command: filebeat -e -strict.perms=false
+    volumes:
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
+      - /var/log/:/var/log/:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      NODE_NAME: $HOSTNAME
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+      kibana: { condition: service_healthy }
+      filebeat-init: { condition: service_started }
+      logstash: { condition: service_healthy }
+    networks:
+      - elk
+
+  heartbeat-init:
+    build:
+      context: heartbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    user: root
+    command: heartbeat setup -E setup.kibana.host=kibana:5601 -E output.elasticsearch.hosts=["elasticsearch:9200"]
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      NODE_NAME: $HOSTNAME
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+      kibana: { condition: service_healthy }
+    networks:
+      - elk
+
+  heartbeat:
+    build:
+      context: heartbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    user: root
+    command: heartbeat -e -strict.perms=false
+    volumes:
+      - ./heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      NODE_NAME: $HOSTNAME
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+      kibana: { condition: service_healthy }
+      heartbeat-init: { condition: service_started }
+      logstash: { condition: service_healthy }
+    networks:
+      - elk
+
+  metricbeat-init:
+    build:
+      context: metricbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    user: root
+    command: metricbeat setup -E setup.kibana.host=kibana:5601 -E output.elasticsearch.hosts=["elasticsearch:9200"]
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      NODE_NAME: $HOSTNAME
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+      kibana: { condition: service_healthy }
+    networks:
+      - elk
+
   metricbeat:
     build:
       context: metricbeat/
@@ -21,6 +114,8 @@ services:
     depends_on:
       elasticsearch: { condition: service_healthy }
       kibana: { condition: service_healthy }
+      metricbeat-init: { condition: service_started }
+      logstash: { condition: service_healthy }
     networks:
       - elk
 
@@ -58,8 +153,11 @@ services:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
       - elk
+    healthcheck:
+      test: ["CMD", "curl","-s" ,"-f", "http://localhost:9600"]
     depends_on:
       elasticsearch: { condition: service_healthy }
+      kibana: { condition: service_healthy }
 
   kibana:
     build:
