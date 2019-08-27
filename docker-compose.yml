@@ -11,7 +11,7 @@ services:
     user: root
     command: filebeat setup -E setup.kibana.host=kibana:5601 -E output.elasticsearch.hosts=["elasticsearch:9200"]
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
       NODE_NAME: $HOSTNAME
     depends_on:
       elasticsearch: { condition: service_healthy }
@@ -32,7 +32,7 @@ services:
       - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
       - /var/log/:/var/log/:ro
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
       NODE_NAME: $HOSTNAME
     depends_on:
       elasticsearch: { condition: service_healthy }
@@ -50,7 +50,7 @@ services:
     user: root
     command: heartbeat setup -E setup.kibana.host=kibana:5601 -E output.elasticsearch.hosts=["elasticsearch:9200"]
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
       NODE_NAME: $HOSTNAME
     depends_on:
       elasticsearch: { condition: service_healthy }
@@ -69,7 +69,7 @@ services:
       - ./heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
       NODE_NAME: $HOSTNAME
     depends_on:
       elasticsearch: { condition: service_healthy }
@@ -87,7 +87,7 @@ services:
     user: root
     command: metricbeat setup -E setup.kibana.host=kibana:5601 -E output.elasticsearch.hosts=["elasticsearch:9200"]
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
       NODE_NAME: $HOSTNAME
     depends_on:
       elasticsearch: { condition: service_healthy }
@@ -109,7 +109,7 @@ services:
       - /proc:/hostfs/proc:ro
       - /:/hostfs:ro
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"
       NODE_NAME: $HOSTNAME
     depends_on:
       elasticsearch: { condition: service_healthy }
@@ -132,7 +132,7 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
+      ES_JAVA_OPTS: "-Xmx768m -Xms768m"
       ELASTIC_PASSWORD: changeme
     healthcheck:
       test: ["CMD", "curl","-s" ,"-f", "http://localhost:9200/_cat/health"]
